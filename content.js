@@ -1,55 +1,37 @@
-function addCopyButtons() {
-  const rows = document.querySelectorAll(".resultset .row");
+function hijackCopyHiddenButtons() {
+    const rows = document.querySelectorAll(".resultset .row");
 
-  rows.forEach(function(row) {
-    const leftDiv = row.querySelector('.left');
-    if (!leftDiv) return;
+    rows.forEach(row => {
+        // Grab the hidden copy button
+        const hiddenCopy = row.querySelector(".copy.hidden");
+        if (!hiddenCopy) return;
+        if (hiddenCopy.dataset.patched) return;
+        hiddenCopy.dataset.patched = "true";
 
-    if (leftDiv.querySelector('.copy-icon')) return;
+        // Make parent container allow overflow
+        const leftDiv = row.querySelector(".left");
+        if (leftDiv) leftDiv.style.overflow = "visible";
 
-    const copyButton = document.createElement('button');
-    copyButton.className = 'copy-icon copy';
-    copyButton.style.background = 'url(/protected/image/gen/trade.png?v=1768361084361&key=nIFEZiE4lkptZMARNY-yNQ) no-repeat';
-    copyButton.style.backgroundPosition = '-260px -157px';
-    copyButton.style.width = '30px';
-    copyButton.style.height = '30px';
-    copyButton.style.position = 'absolute';
-    copyButton.style.border = '0';
-    copyButton.style.bottom = '8px';
-    copyButton.style.left = '44px';
-    copyButton.style.display = 'none';
-    copyButton.style.cursor = 'pointer';
+        // Remove inline "display: none" or hidden class
+        hiddenCopy.classList.remove("hidden");
+        hiddenCopy.style.removeProperty("display");
 
-    row.addEventListener('mouseenter', function() { copyButton.style.display = 'block'; });
-    row.addEventListener('mouseleave', function() { copyButton.style.display = 'none'; });
-
-    // Click handler: copy full item data
-    copyButton.addEventListener('click', function() {
-        // Pass the row instead of popup
-        var itemText = parseItemDataSimple(row);
-
-        navigator.clipboard.writeText(itemText).then(function() {
-            // show item name only in toast
-            var itemName = itemText.split("\n")[2] || "Item";
-            showCopyToast("Copied: " + itemName);
-        }).catch(function(err) {
-            console.error('Failed to copy:', err);
-            showCopyToast('Failed to copy!');
+        // Keep hover and click behavior intact
+        // Hover styling comes from original CSS, no need to handle in JS
+        hiddenCopy.addEventListener("click", () => {
+            const itemText = parseItemDataSimple(row);
+            const itemName = itemText.split("\n")[2] || "Item";
+            navigator.clipboard.writeText(itemText)
+                .then(() => showCopyToast("Copied: " + itemName))
+                .catch(() => showCopyToast("Failed to copy!"));
         });
     });
-
-    leftDiv.appendChild(copyButton);
-  });
 }
 
-// Observe dynamic rows
-const observer = new MutationObserver(() => {
-  const resultSet = document.querySelector(".resultset");
-  if (resultSet) addCopyButtons();
-});
-
+// Run initially and after DOM changes
+hijackCopyHiddenButtons();
+const observer = new MutationObserver(hijackCopyHiddenButtons);
 observer.observe(document.body, { childList: true, subtree: true });
-addCopyButtons();
 
 // Toast function
 function showCopyToast(message) {
