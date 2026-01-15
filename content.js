@@ -8,6 +8,11 @@ function hijackCopyHiddenButtons() {
         if (hiddenCopy.dataset.patched) return;
         hiddenCopy.dataset.patched = "true";
 
+        // Skip if this row is a gem popup
+        const popup = row.querySelector(".itemPopupContainer");
+        if (popup && popup.classList.contains("gemPopup")) return;
+        if (popup && popup.classList.contains("currencyPopup")) return;
+
         // Make parent container allow overflow
         const leftDiv = row.querySelector(".left");
         if (leftDiv) leftDiv.style.overflow = "visible";
@@ -17,7 +22,6 @@ function hijackCopyHiddenButtons() {
         hiddenCopy.style.removeProperty("display");
 
         // Keep hover and click behavior intact
-        // Hover styling comes from original CSS, no need to handle in JS
         hiddenCopy.addEventListener("click", () => {
             const itemText = parseItemDataSimple(row);
             const itemName = itemText.split("\n")[2] || "Item";
