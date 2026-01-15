@@ -1,0 +1,35 @@
+.poe2-copy-btn {
+  margin-left: 8px;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+
+  background: #222;
+  color: #fff;
+  border: 1px solid #555;
+  border-radius: 3px;
+}
+
+.poe2-copy-btn:hover {
+  background: #333;
+}
+
+.toast-container > div {
+  position: relative;
+  pointer-events: auto;
+  overflow: hidden;
+  margin: 0 0 6px;
+  padding: 14px 14px 14px 48px;
+  background-position: 15px;
+  background-repeat: no-repeat;
+  color: #fff;
+  opacity: .8;
+  background-color: #1e2124;
+}
+.toast-success {
+  background-image: url(data:image/png;base64,...);
+}
+.toast-message {
+  word-wrap: break-word;
+  width: auto;
+}
