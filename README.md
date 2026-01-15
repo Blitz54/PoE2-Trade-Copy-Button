@@ -1,4 +1,4 @@
-<img width="1523" height="524" alt="image" src="https://github.com/user-attachments/assets/f212ee6e-abe6-4aa6-bb86-4f38b97f9da3" />
+<img width="1527" height="525" alt="image" src="https://github.com/user-attachments/assets/e92861ca-1685-402b-9507-c0d452998b59" />
 
 Adds a vibe coded copy button to the PoE2 trade site. It uses the same icon as the PoE1 trade site.
 
