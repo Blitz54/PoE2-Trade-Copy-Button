@@ -88,7 +88,7 @@ function showCopyToast(message) {
     toast.style.boxSizing = 'border-box';
     toast.style.backgroundImage = 'url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADsSURBVEhLY2AYBfQMgf///3P8+/evAIgvA/FsIF+BavYDDWMBGroaSMMBiE8VC7AZDrIFaMFnii3AZTjUgsUUWUDA8OdAH6iQbQEhw4HyGsPEcKBXBIC4ARhex4G4BsjmweU1soIFaGg/WtoFZRIZdEvIMhxkCCjXIVsATV6gFGACs4Rsw0EGgIIH3QJYJgHSARQZDrWAB+jawzgs+Q2UO49D7jnRSRGoEFRILcdmEMWGI0cm0JJ2QpYA1RDvcmzJEWhABhD/pqrL0S0CWuABKgnRki9lLseS7g2AlqwHWQSKH4oKLrILpRGhEQCw2LiRUIa4lwAAAABJRU5ErkJggg==)'; // ✅ same checkmark as before
     toast.style.backgroundRepeat = 'no-repeat';
-    toast.style.backgroundPosition = '15px'; // ✅ exact location
+    toast.style.backgroundPosition = '15px';
     toast.style.backgroundSize = 'auto';
 
     // Add text
@@ -200,7 +200,7 @@ function parseItemDataSimple(itemElement) {
     // Extract mods
     function extractMods(selector, label) {
         var mods = "";
-        var elements = itemElement.querySelectorAll(selector + " .s");
+        var elements = itemElement.querySelectorAll(selector + " .s, " + selector + " .suffix");
         for (var i = 0; i < elements.length; i++) {
             mods += elements[i].textContent.trim();
             if (label) mods += " (" + label + ")";
@@ -215,15 +215,20 @@ function parseItemDataSimple(itemElement) {
     var fracturedMods = extractMods(".fracturedMod", "fractured");
     var explicitMods = extractMods(".explicitMod");
     var desecratedMods = extractMods(".desecratedMod", "desecrated");
+    var veiledMods = extractMods(".veiledMod", "desecrated");
     var mutatedMods = extractMods(".mutatedMod", "mutated");
 
-    // Corrupted / unmet / augmented
+    // Corrupted / Unidentified
     var unmetEl = itemElement.querySelector(".unmet");
     var unmet = unmetEl ? unmetEl.textContent.trim() : "";
 
     // Sanctified
     var sanctifiedEl = itemElement.querySelector(".sanctified");
     var sanctified = sanctifiedEl ? sanctifiedEl.textContent.trim() : "";
+    
+    // Mirrored
+    var augmentedEl = itemElement.querySelector(".augmented");
+    var augmented = augmentedEl ? augmentedEl.textContent.trim() : "";
 
     // Build final string step by step
     var lines = [];
@@ -270,6 +275,7 @@ function parseItemDataSimple(itemElement) {
         lines.push(explicitMods.trim());
     }
     if (desecratedMods) lines.push(desecratedMods.trim());
+    if (veiledMods) lines.push(veiledMods.trim());
     if (mutatedMods) lines.push(mutatedMods.trim());
     if (unmet) {
         lines.push("--------");
@@ -278,6 +284,10 @@ function parseItemDataSimple(itemElement) {
     if (sanctified) {
         lines.push("--------");
         lines.push(sanctified);
+    }
+    if (augmented) {
+        lines.push("--------");
+        lines.push(augmented);
     }
 
     return lines.join("\n");
