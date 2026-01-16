@@ -8,7 +8,7 @@ function hijackCopyHiddenButtons() {
         if (hiddenCopy.dataset.patched) return;
         hiddenCopy.dataset.patched = "true";
 
-        // Skip if this row is a gem popup
+        // Skip if this row is a gem or currency popup
         const popup = row.querySelector(".itemPopupContainer");
         if (popup && popup.classList.contains("gemPopup")) return;
         if (popup && popup.classList.contains("currencyPopup")) return;
@@ -161,10 +161,21 @@ function parseItemDataSimple(itemElement) {
     var reqEl = itemElement.querySelector(".requirements");
     if (reqEl) {
         var reqText = reqEl.textContent.trim();
-        if (reqText.match(/Level\s(\d+)/)) requirements += "Level " + reqText.match(/Level\s(\d+)/)[1] + ", ";
-        if (reqText.match(/(\d+)\sStr/)) requirements += reqText.match(/(\d+)\sStr/)[1] + " Str, ";
-        if (reqText.match(/(\d+)\sDex/)) requirements += reqText.match(/(\d+)\sDex/)[1] + " Dex, ";
-        if (reqText.match(/(\d+)\sInt/)) requirements += reqText.match(/(\d+)\sInt/)[1] + " Int" + "\n";
+        var match;
+
+        if (match = reqText.match(/Level\s(\d+)/))
+            requirements += "Level " + match[1];
+
+        if (match = reqText.match(/(\d+)\sStr/))
+            requirements += (requirements ? ", " : "") + match[1] + " Str";
+
+        if (match = reqText.match(/(\d+)\sDex/))
+            requirements += (requirements ? ", " : "") + match[1] + " Dex";
+
+        if (match = reqText.match(/(\d+)\sInt/))
+            requirements += (requirements ? ", " : "") + match[1] + " Int";
+
+        requirements += "\n";
     }
 
     // Extract sockets
