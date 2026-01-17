@@ -6,28 +6,31 @@ function hijackCopyHiddenButtons() {
         const hiddenCopy = row.querySelector(".copy.hidden");
         if (!hiddenCopy) return;
         if (hiddenCopy.dataset.patched) return;
+
+        // Skip gems & currency
+        const popup = row.querySelector(".itemPopupContainer");
+        if (popup && (popup.classList.contains("gemPopup") || popup.classList.contains("currencyPopup"))) {
+            return;
+        }
+
         hiddenCopy.dataset.patched = "true";
 
-        // Skip if this row is a gem or currency popup
-        const popup = row.querySelector(".itemPopupContainer");
-        if (popup && popup.classList.contains("gemPopup")) return;
-        if (popup && popup.classList.contains("currencyPopup")) return;
-
-        // Make parent container allow overflow
         const leftDiv = row.querySelector(".left");
         if (leftDiv) leftDiv.style.overflow = "visible";
 
-        // Remove inline "display: none" or hidden class
         hiddenCopy.classList.remove("hidden");
         hiddenCopy.style.removeProperty("display");
 
         // Keep hover and click behavior intact
         hiddenCopy.addEventListener("click", () => {
             const itemText = parseItemDataSimple(row);
-            const itemName = itemText.split("\n")[2] || "Item";
+            const nameEl = row.querySelector(".itemName");
+            const itemName = nameEl ? nameEl.textContent.trim() : "Item";
+            const itemColor = nameEl ? getComputedStyle(nameEl).color : "#fff";
+
             navigator.clipboard.writeText(itemText)
-                .then(() => showCopyToast("Copied: " + itemName))
-                .catch(() => showCopyToast("Failed to copy!"));
+                .then(() => showCopyToast(itemName, itemColor))
+                .catch(() => showCopyToast("Failed to copy!", "#fff"));
         });
     });
 }
@@ -38,7 +41,7 @@ const observer = new MutationObserver(hijackCopyHiddenButtons);
 observer.observe(document.body, { childList: true, subtree: true });
 
 // Toast function
-function showCopyToast(message) {
+function showCopyToast(itemName, itemColor) {
     // Create isolated bottom-center container
     let container = document.querySelector('.my-copy-toast-container');
     if (!container) {
@@ -58,54 +61,74 @@ function showCopyToast(message) {
         document.body.appendChild(container);
     }
 
-    // Create the toast exactly as it was working before
+    // Create the toast
     const toast = document.createElement('div');
     toast.className = 'toast toast-success';
-    toast.style.position = 'relative';
-    toast.style.pointerEvents = 'auto';
-    toast.style.overflow = 'hidden';
-    toast.style.margin = '0 0 6px';
-    toast.style.padding = '14px 14px 14px 48px'; // leave space for icon
-    toast.style.backgroundColor = '#1e2124';
-    toast.style.color = '#fff';
-    toast.style.opacity = '0';
-    toast.style.minWidth = '300px';
-    toast.style.borderRadius = '0px';
-    toast.style.boxSizing = 'border-box';
-    toast.style.backgroundImage = 'url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADsSURBVEhLY2AYBfQMgf///3P8+/evAIgvA/FsIF+BavYDDWMBGroaSMMBiE8VC7AZDrIFaMFnii3AZTjUgsUUWUDA8OdAH6iQbQEhw4HyGsPEcKBXBIC4ARhex4G4BsjmweU1soIFaGg/WtoFZRIZdEvIMhxkCCjXIVsATV6gFGACs4Rsw0EGgIIH3QJYJgHSARQZDrWAB+jawzgs+Q2UO49D7jnRSRGoEFRILcdmEMWGI0cm0JJ2QpYA1RDvcmzJEWhABhD/pqrL0S0CWuABKgnRki9lLseS7g2AlqwHWQSKH4oKLrILpRGhEQCw2LiRUIa4lwAAAABJRU5ErkJggg==)'; // ✅ same checkmark as before
-    toast.style.backgroundRepeat = 'no-repeat';
-    toast.style.backgroundPosition = '15px';
-    toast.style.backgroundSize = 'auto';
+    Object.assign(toast.style, {
+        position: 'relative',
+        pointerEvents: 'auto',
+        overflow: 'hidden',
+        margin: '0 0 6px',
+        padding: '14px 14px 14px 48px',
+        backgroundColor: '#1e2124',
+        opacity: '0',
+        minWidth: '300px',
+        borderRadius: '0px',
+        boxSizing: 'border-box',
+        fontFamily: 'FontinSmallCaps, Verdana, Arial, sans-serif',
+        backgroundImage: 'url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADsSURBVEhLY2AYBfQMgf///3P8+/evAIgvA/FsIF+BavYDDWMBGroaSMMBiE8VC7AZDrIFaMFnii3AZTjUgsUUWUDA8OdAH6iQbQEhw4HyGsPEcKBXBIC4ARhex4G4BsjmweU1soIFaGg/WtoFZRIZdEvIMhxkCCjXIVsATV6gFGACs4Rsw0EGgIIH3QJYJgHSARQZDrWAB+jawzgs+Q2UO49D7jnRSRGoEFRILcdmEMWGI0cm0JJ2QpYA1RDvcmzJEWhABhD/pqrL0S0CWuABKgnRki9lLseS7g2AlqwHWQSKH4oKLrILpRGhEQCw2LiRUIa4lwAAAABJRU5ErkJggg==)',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: '15px',
+    });
 
-    // Add text
+    // Message
     const text = document.createElement('div');
     text.className = 'toast-message';
-    text.textContent = message;
-    toast.appendChild(text);
+    Object.assign(text.style, {
+        fontSize: '16px',     // ⬅ base size ("Copied:")
+        lineHeight: '1.2',
+        color: '#fff',
+    });
 
-    // Append to container
+    text.innerHTML = `
+        Copied:
+        <span style="
+            display: inline-block;
+            margin-left: 6px;
+            color: ${itemColor};
+            font-family: FontinSmallCaps, Verdana, Arial, sans-serif;
+            font-size: 16px;   /* ⬅ BIG item name */
+        ">
+            ${itemName}
+        </span>
+    `;
+
+    toast.appendChild(text);
     container.appendChild(toast);
 
     // Animate in
-    toast.animate([
-        { transform: 'translateY(20px)', opacity: 0 },
-        { transform: 'translateY(0)', opacity: 0.8 }
-    ], {
-        duration: 300,
-        easing: 'ease-out',
-        fill: 'forwards'
-    });
+    toast.animate(
+        [
+            { transform: 'translateY(20px)', opacity: 0 },
+            { transform: 'translateY(0)', opacity: 0.8 }
+        ],
+        {
+            duration: 300,
+            easing: 'ease-out',
+            fill: 'forwards'
+        }
+    );
 
     // Auto-remove
     setTimeout(() => {
-        const fadeOut = toast.animate([
-            { opacity: 0.8 },
-            { opacity: 0 }
-        ], {
-            duration: 300,
-            easing: 'ease-in',
-            fill: 'forwards'
-        });
+        const fadeOut = toast.animate(
+            [{ opacity: 0.8 }, { opacity: 0 }],
+            {
+                duration: 300,
+                easing: 'ease-in',
+                fill: 'forwards'
+            }
+        );
         fadeOut.onfinish = () => toast.remove();
     }, 3000);
 }
