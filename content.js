@@ -197,11 +197,24 @@ function parseItemDataSimple(itemElement) {
     // Extract mods
     function extractMods(selector, label) {
         var mods = "";
-        var elements = itemElement.querySelectorAll(selector + " .s, " + selector + " .suffix");
-        for (var i = 0; i < elements.length; i++) {
-            mods += elements[i].textContent.trim();
-            if (label) mods += " (" + label + ")";
-            mods += "\n";
+        var modBlocks = itemElement.querySelectorAll(selector);
+
+        for (var i = 0; i < modBlocks.length; i++) {
+            var block = modBlocks[i];
+
+            // First try normal stat lines
+            var lines = block.querySelectorAll(".lc.s, .suffix");
+
+            // Fallback: bonded-style line (only if no .lc.s exists)
+            if (lines.length === 0) {
+                lines = block.querySelectorAll(".lc");
+            }
+
+            for (var j = 0; j < lines.length; j++) {
+                mods += lines[j].textContent.trim();
+                if (label) mods += " (" + label + ")";
+                mods += "\n";
+            }
         }
         return mods;
     }
