@@ -225,18 +225,26 @@ function parseItemDataSimple(itemElement) {
         for (var i = 0; i < modBlocks.length; i++) {
             var block = modBlocks[i];
 
-            // First try normal stat lines
+            // Prefer normal stat lines
             var lines = block.querySelectorAll(".lc.s, .suffix");
 
-            // Fallback: bonded-style line (only if no .lc.s exists)
+            // Fallback: bonded-style line
             if (lines.length === 0) {
                 lines = block.querySelectorAll(".lc");
             }
 
             for (var j = 0; j < lines.length; j++) {
-                mods += lines[j].textContent.trim();
-                if (label) mods += " (" + label + ")";
-                mods += "\n";
+                // Split by <br> rendered as newlines
+                var parts = lines[j].innerText
+                    .split(/\n+/)
+                    .map(s => s.trim())
+                    .filter(Boolean);
+
+                for (var k = 0; k < parts.length; k++) {
+                    mods += parts[k];
+                    if (label) mods += " (" + label + ")";
+                    mods += "\n";
+                }
             }
         }
         return mods;
