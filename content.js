@@ -310,11 +310,11 @@ function parseItemDataSimple(itemElement) {
         lines.push("--------");
         lines.push(implicitMods.trim());
     }
-    if (fracturedMods) lines.push(fracturedMods.trim());
     if (explicitMods) {
         lines.push("--------");
         lines.push(explicitMods.trim());
     }
+    if (fracturedMods) lines.push(fracturedMods.trim());
     if (desecratedMods) lines.push(desecratedMods.trim());
     if (veiledMods) lines.push(veiledMods.trim());
     if (mutatedMods) lines.push(mutatedMods.trim());
