@@ -188,7 +188,13 @@ function parseItemDataSimple(itemElement) {
         var socketElements = iconContainer.querySelectorAll(".socket");
         if (socketElements.length > 0) {
             var socketText = [];
-            for (var i = 0; i < socketElements.length; i++) socketText.push("S");
+            for (var i = 0; i < socketElements.length; i++) {
+                if (socketElements[i].classList.contains("socket--jewel")) {
+                    socketText.push("J");
+                } else if (socketElements[i].classList.contains("socket--rune")) {
+                    socketText.push("S");
+                }
+            }
             socketsLine = "Sockets: " + socketText.join(" ");
         }
     }
