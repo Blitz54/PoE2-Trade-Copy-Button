@@ -181,28 +181,6 @@ function parseItemDataSimple(itemElement) {
         }
     }
 
-    // Extract requirements
-    var requirements = "";
-    var reqEl = itemElement.querySelector(".item-popup__property--requirements");
-    if (reqEl) {
-        var reqText = reqEl.textContent.trim();
-        var match;
-
-        if (match = reqText.match(/Level\s(\d+)/))
-            requirements += "Level " + match[1];
-
-        if (match = reqText.match(/(\d+)\sStr/))
-            requirements += (requirements ? ", " : "") + match[1] + " Str";
-
-        if (match = reqText.match(/(\d+)\sDex/))
-            requirements += (requirements ? ", " : "") + match[1] + " Dex";
-
-        if (match = reqText.match(/(\d+)\sInt/))
-            requirements += (requirements ? ", " : "") + match[1] + " Int";
-
-        requirements += "\n";
-    }
-
     // Extract sockets
     var socketsLine = "";
     var iconContainer = itemElement.querySelector(".newItemContainer.itemRendered .iconContainer .icon");
@@ -213,14 +191,6 @@ function parseItemDataSimple(itemElement) {
             for (var i = 0; i < socketElements.length; i++) socketText.push("S");
             socketsLine = "Sockets: " + socketText.join(" ");
         }
-    }
-
-    // Item level
-    var ilvlSpan = itemElement.querySelector('[data-field="ilvl"]');
-    var itemLevel = "";
-    if (ilvlSpan) {
-        var m = ilvlSpan.textContent.match(/(\d+)/);
-        if (m) itemLevel = m[1];
     }
 
     // Extract mods
@@ -286,17 +256,8 @@ function parseItemDataSimple(itemElement) {
         lines.push("--------");
         lines.push(properties.trim());
     }
-    if (requirements) {
-        lines.push("--------");
-        lines.push("Requires: " + requirements.trim());
-    }
     if (socketsLine) {
-        lines.push("--------");
         lines.push(socketsLine);
-    }
-    if (itemLevel) {
-        lines.push("--------");
-        lines.push("Item Level: " + itemLevel);
     }
     if (skillsText) {
         lines.push("--------");
