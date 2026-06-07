@@ -8,8 +8,8 @@ function hijackCopyHiddenButtons() {
         if (hiddenCopy.dataset.patched) return;
 
         // Skip gems & currency
-        const popup = row.querySelector(".itemPopupContainer");
-        if (popup && (popup.classList.contains("gemPopup") || popup.classList.contains("currencyPopup"))) {
+        const popup = row.querySelector(".item-popup");
+        if (popup && (popup.classList.contains("item-popup--gem") || popup.classList.contains("item-popup--currency"))) {
             return;
         }
 
@@ -24,7 +24,7 @@ function hijackCopyHiddenButtons() {
         // Keep hover and click behavior intact
         hiddenCopy.addEventListener("click", () => {
             const itemText = parseItemDataSimple(row);
-            const nameEl = row.querySelector(".itemName");
+            const nameEl = row.querySelector(".item-popup__header-line");
             const itemName = nameEl ? nameEl.textContent.trim() : "Item";
             const itemColor = nameEl ? getComputedStyle(nameEl).color : "#fff";
 
@@ -135,19 +135,19 @@ function showCopyToast(itemName, itemColor) {
 
 function parseItemDataSimple(itemElement) {
     // Extract item class
-    var itemClassEl = itemElement.querySelector(".property .lc span");
+    var itemClassEl = itemElement.querySelector(".item-popup__property .lc span");
     var itemClass = itemClassEl ? itemClassEl.textContent.trim() : "";
 
     // Extract rarity from popup
     var rarityMap = {
-        rarePopup: "Rare",
-        magicPopup: "Magic",
-        normalPopup: "Normal",
-        uniquePopup: "Unique",
-        relicPopup: "Relic",
+        "item-popup--rare": "Rare",
+        "item-popup--magic": "Magic",
+        "item-popup--normal": "Normal",
+        "item-popup--unique": "Unique",
+        "item-popup--relic": "Relic",
     };
     var rarity = "Unknown";
-    var popup = itemElement.querySelector(".itemPopupContainer");
+    var popup = itemElement.querySelector(".item-popup");
     if (popup) {
         var classList = popup.classList;
         for (var i = 0; i < classList.length; i++) {
@@ -158,20 +158,22 @@ function parseItemDataSimple(itemElement) {
         }
     }
 
-    // Extract item name
-    var itemNameEl = itemElement.querySelector(".itemName .lc");
-    var itemName = itemNameEl ? itemNameEl.textContent.trim() : "";
-
-    // Extract type line
-    var typeLineEl = itemElement.querySelector(".itemName.typeLine .lc");
-    var typeLine = typeLineEl ? typeLineEl.textContent.trim() : "";
+    var headerLines = itemElement.querySelectorAll(".item-popup__header-line");
+    var itemName = "";
+    var typeLine = "";
+    if (headerLines.length >= 2) {
+        itemName = headerLines[0].textContent.trim();
+        typeLine = headerLines[1].textContent.trim();
+    } else if (headerLines.length === 1) {
+        typeLine = headerLines[0].textContent.trim();
+    }
 
     // Extract properties (skip first .property)
     var properties = "";
     var skillsText = "";
-    var propertyEls = itemElement.querySelectorAll(".property");
+    var propertyEls = itemElement.querySelectorAll(".item-property");
     for (var i = 1; i < propertyEls.length; i++) {
-        if (propertyEls[i].classList.contains("skill")) {
+        if (propertyEls[i].classList.contains("item-popup__property--skill")) {
             // Treat skills separately
             skillsText += propertyEls[i].textContent.trim() + "\n";
         } else {
@@ -181,7 +183,7 @@ function parseItemDataSimple(itemElement) {
 
     // Extract requirements
     var requirements = "";
-    var reqEl = itemElement.querySelector(".requirements");
+    var reqEl = itemElement.querySelector(".item-popup__property--requirements");
     if (reqEl) {
         var reqText = reqEl.textContent.trim();
         var match;
@@ -214,8 +216,12 @@ function parseItemDataSimple(itemElement) {
     }
 
     // Item level
-    var itemLevelEl = itemElement.querySelector(".itemLevel .colourDefault");
-    var itemLevel = itemLevelEl ? itemLevelEl.textContent.trim() : "";
+    var ilvlSpan = itemElement.querySelector('[data-field="ilvl"]');
+    var itemLevel = "";
+    if (ilvlSpan) {
+        var m = ilvlSpan.textContent.match(/(\d+)/);
+        if (m) itemLevel = m[1];
+    }
 
     // Extract mods
     function extractMods(selector, label) {
@@ -226,7 +232,7 @@ function parseItemDataSimple(itemElement) {
             var block = modBlocks[i];
 
             // Prefer normal stat lines
-            var lines = block.querySelectorAll(".lc.s, .suffix");
+            var lines = block.querySelectorAll(".lc.s");
 
             // Fallback: bonded-style line
             if (lines.length === 0) {
@@ -250,26 +256,24 @@ function parseItemDataSimple(itemElement) {
         return mods;
     }
 
-    var enchantMods = extractMods(".enchantMod", "enchant");
-    var runeMods = extractMods(".runeMod", "rune");
-    var implicitMods = extractMods(".implicitMod", "implicit");
-    var fracturedMods = extractMods(".fracturedMod", "fractured");
-    var explicitMods = extractMods(".explicitMod");
-    var desecratedMods = extractMods(".desecratedMod", "desecrated");
-    var veiledMods = extractMods(".veiledMod", "desecrated");
-    var mutatedMods = extractMods(".mutatedMod", "mutated");
+    var enchantMods = extractMods(".item-mod--enchant", "enchant");
+    var runeMods = extractMods(".item-mod--rune", "rune");
+    var implicitMods = extractMods(".item-mod--implicit", "implicit");
+    var fracturedMods = extractMods(".item-mod--fractured", "fractured");
+    var explicitMods = extractMods(".item-mod--explicit");
+    var desecratedMods = extractMods(".item-mod--desecrated", "desecrated");
+    var veiledMods = extractMods(".item-mod--veiled", "desecrated");
+    var mutatedMods = extractMods(".item-mod--mutated", "mutated");
 
-    // Corrupted / Unidentified
-    var unmetEl = itemElement.querySelector(".unmet");
-    var unmet = unmetEl ? unmetEl.textContent.trim() : "";
-
-    // Sanctified
-    var sanctifiedEl = itemElement.querySelector(".sanctified");
-    var sanctified = sanctifiedEl ? sanctifiedEl.textContent.trim() : "";
-    
-    // Mirrored
-    var augmentedEl = itemElement.querySelector(".augmented");
-    var augmented = augmentedEl ? augmentedEl.textContent.trim() : "";
+    var statusTexts = [];
+    var statusDivs = itemElement.querySelectorAll('.item-popup__content > div:not([class])');
+    const wordFilter = ["Sanctified", "Mirrored", "Unidentified", "Corrupted"]
+    for (var i = 0; i < statusDivs.length; i++) {
+        var statusText = statusDivs[i].textContent.trim();
+        if (statusText && wordFilter.includes(statusText)) {
+            statusTexts.push(statusText);
+        }
+    }
 
     // Build final string step by step
     var lines = [];
@@ -318,17 +322,9 @@ function parseItemDataSimple(itemElement) {
     if (desecratedMods) lines.push(desecratedMods.trim());
     if (veiledMods) lines.push(veiledMods.trim());
     if (mutatedMods) lines.push(mutatedMods.trim());
-    if (unmet) {
+    for (var i = 0; i < statusTexts.length; i++) {
         lines.push("--------");
-        lines.push(unmet);
-    }
-    if (sanctified) {
-        lines.push("--------");
-        lines.push(sanctified);
-    }
-    if (augmented) {
-        lines.push("--------");
-        lines.push(augmented);
+        lines.push(statusTexts[i]);
     }
 
     return lines.join("\n");
