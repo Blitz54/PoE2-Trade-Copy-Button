@@ -415,19 +415,21 @@ function parseItemDataSimple(itemElement) {
 	var veiledBlocks     = extractModBlocks(".item-mod--veiled");
 	var mutatedBlocks    = extractModBlocks(".item-mod--mutated");
 
-	function renderBlocks(blocks, labelSuffix) {
-		var out = "";
-		for (var i = 0; i < blocks.length; i++) {
-			var b = blocks[i];
-			if (b.header) out += b.header + "\n";
-			for (var j = 0; j < b.lines.length; j++) {
-				out += b.lines[j];
-				if (labelSuffix) out += " (" + labelSuffix + ")";
-				out += "\n";
-			}
-		}
-		return out;
-	}
+    function renderBlocks(blocks, labelSuffix, uniqueFallback) {
+        var out = "";
+        for (var i = 0; i < blocks.length; i++) {
+            var b = blocks[i];
+            var header = b.header;
+            if (!header && uniqueFallback) header = "{ Unique Modifier }";
+            if (header) out += header + "\n";
+            for (var j = 0; j < b.lines.length; j++) {
+                out += b.lines[j];
+                if (labelSuffix) out += " (" + labelSuffix + ")";
+                out += "\n";
+            }
+        }
+        return out;
+    }
 
 	// Enchant blocks always get { Corruption Enhancement } header — no tier info in DOM
 	function renderEnchantBlocks(blocks) {
@@ -446,7 +448,7 @@ function parseItemDataSimple(itemElement) {
 	var runeMods       = renderBlocks(runeBlocks, "rune");
 	var implicitMods   = renderBlocks(implicitBlocks, "implicit");
 	var fracturedMods  = renderBlocks(fracturedBlocks, "fractured");
-	var explicitMods   = renderBlocks(explicitBlocks, null);
+	var explicitMods   = renderBlocks(explicitBlocks, null, rarity === "Unique");
 	var desecratedMods = renderBlocks(desecratedBlocks, "desecrated");
 	var veiledMods     = renderBlocks(veiledBlocks, "veiled");
 	var mutatedMods    = renderBlocks(mutatedBlocks, "mutated");
