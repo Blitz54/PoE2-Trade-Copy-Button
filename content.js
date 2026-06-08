@@ -122,11 +122,15 @@ function parseItemDataSimple(itemElement) {
 
 	var rarityMap = {
 		"item-popup--rare": "Rare",
+		"item-popup--runic-rare": "Rare",
 		"item-popup--magic": "Magic",
+		"item-popup--runic-magic": "Magic",
 		"item-popup--normal": "Normal",
+		"item-popup--runic-normal": "Normal",
 		"item-popup--unique": "Unique",
 		"item-popup--runic-unique": "Unique",
 		"item-popup--relic": "Relic",
+		"item-popup--runic-relic": "Relic", // May not exist, none on trade to test.
 	};
 	var rarity = "Unknown";
 	var popup = itemElement.querySelector(".item-popup");
