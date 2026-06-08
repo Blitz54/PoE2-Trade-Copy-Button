@@ -1,0 +1,36 @@
+  {
+  "manifest_version": 3,
+  "name": "PoE2 Trade Copy Button",
+  "version": "2.0",
+  "description": "Adds a copy button next to PoE2 trade items. Similar in style to the PoE1 GGG button.",
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.pathofexile.com/trade2*"
+      ],
+      "js": ["content.js"],
+      "css": ["styles.css"]
+    }
+  ],
+  "permissions": [
+    "clipboardWrite"
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "poe2-trade-copy@blitz54.github.io",
+      "strict_min_version": "142.0",
+      "data_collection_permissions": {
+        "required": ["none"],
+        "collects_personal_data": false,
+        "collects_location_data": false,
+        "collects_financial_data": false,
+        "collects_health_data": false,
+        "collects_authentication_info": false,
+        "collects_contacts": false,
+        "collects_browsing_history": false,
+        "collects_search_history": false,
+        "collects_identifiers": false
+      }
+    }
+  }
+}

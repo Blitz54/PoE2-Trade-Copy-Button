@@ -82,18 +82,19 @@ function showCopyToast(itemName, itemColor) {
 		color: '#fff',
 	});
 
-	text.innerHTML = `
-		Copied:
-		<span style="
-			display: inline-block;
-			margin-left: 6px;
-			color: ${itemColor};
-			font-family: FontinSmallCaps, Verdana, Arial, sans-serif;
-			font-size: 16px;
-		">
-			${itemName}
-		</span>
-	`;
+	text.appendChild(document.createTextNode("Copied:"));
+
+	const span = document.createElement("span");
+	Object.assign(span.style, {
+		display: "inline-block",
+		marginLeft: "6px",
+		color: itemColor,
+		fontFamily: "FontinSmallCaps, Verdana, Arial, sans-serif",
+		fontSize: "16px",
+	});
+
+	span.textContent = itemName;
+	text.appendChild(span);
 
 	toast.appendChild(text);
 	container.appendChild(toast);
@@ -296,8 +297,8 @@ function parseItemDataSimple(itemElement) {
 				var segRangeArrays = [];
 
 				for (var s = 0; s < leftSegments.length; s++) {
-					var tmp = document.createElement("div");
-					tmp.innerHTML = leftSegments[s];
+					var parser = new DOMParser();
+					var tmp = parser.parseFromString(leftSegments[s], "text/html").body;
 					var dEl = tmp.querySelector(".d");
 					var rangeText = dEl ? dEl.textContent.trim() : "";
 					if (dEl) dEl.remove();
@@ -369,8 +370,8 @@ function parseItemDataSimple(itemElement) {
 
 			} else {
 				// Single segment
-				var tmp = document.createElement("div");
-				tmp.innerHTML = leftSegments[0];
+				var parser = new DOMParser();
+				var tmp = parser.parseFromString(leftSegments[0], "text/html").body;
 				var dEl = tmp.querySelector(".d");
 				var rangeText = dEl ? dEl.textContent.trim() : "";
 				if (dEl) dEl.remove();
@@ -448,7 +449,7 @@ function parseItemDataSimple(itemElement) {
 	var runeMods       = renderBlocks(runeBlocks, "rune");
 	var implicitMods   = renderBlocks(implicitBlocks, "implicit");
 	var fracturedMods  = renderBlocks(fracturedBlocks, "fractured");
-	var explicitMods   = renderBlocks(explicitBlocks, null, rarity === "Unique");
+	var explicitMods   = renderBlocks(explicitBlocks, null, rarity === "Unique" || rarity === "Relic");
 	var desecratedMods = renderBlocks(desecratedBlocks, "desecrated");
 	var veiledMods     = renderBlocks(veiledBlocks, "veiled");
 	var mutatedMods    = renderBlocks(mutatedBlocks, "mutated");
