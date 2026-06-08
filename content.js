@@ -455,7 +455,7 @@ function parseItemDataSimple(itemElement) {
 
 	var statusTexts = [];
 	var statusDivs = itemElement.querySelectorAll('.item-popup__content > div:not([class])');
-	var wordFilter = ["Sanctified", "Mirrored", "Unidentified", "Corrupted"];
+	var wordFilter = ["Sanctified", "Mirrored", "Unidentified", "Corrupted", "Twice Corrupted"];
 	for (var i = 0; i < statusDivs.length; i++) {
 		var statusText = statusDivs[i].textContent.trim();
 		if (statusText && wordFilter.includes(statusText)) {
