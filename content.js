@@ -414,6 +414,7 @@ function parseItemDataSimple(itemElement) {
 	var explicitBlocks   = extractModBlocks(".item-mod--explicit");
 	var desecratedBlocks = extractModBlocks(".item-mod--desecrated");
 	var veiledBlocks     = extractModBlocks(".item-mod--veiled");
+	var craftedBlocks    = extractModBlocks(".item-mod--crafted");
 	var mutatedBlocks    = extractModBlocks(".item-mod--mutated");
 
     function renderBlocks(blocks, labelSuffix, uniqueFallback) {
@@ -450,8 +451,9 @@ function parseItemDataSimple(itemElement) {
 	var implicitMods   = renderBlocks(implicitBlocks, "implicit");
 	var fracturedMods  = renderBlocks(fracturedBlocks, "fractured");
 	var explicitMods   = renderBlocks(explicitBlocks, null, rarity === "Unique" || rarity === "Relic");
-	var desecratedMods = renderBlocks(desecratedBlocks, "desecrated");
+	var craftedMods    = renderBlocks(craftedBlocks, "crafted");
 	var veiledMods     = renderBlocks(veiledBlocks, "veiled");
+	var desecratedMods = renderBlocks(desecratedBlocks, "desecrated");
 	var mutatedMods    = renderBlocks(mutatedBlocks, "mutated");
 
 	var statusTexts = [];
@@ -511,8 +513,9 @@ function parseItemDataSimple(itemElement) {
 		lines.push(explicitMods.trim());
 	}
 	if (fracturedMods) lines.push(fracturedMods.trim());
-	if (desecratedMods) lines.push(desecratedMods.trim());
+	if (craftedMods) lines.push(craftedMods.trim());
 	if (veiledMods) lines.push(veiledMods.trim());
+	if (desecratedMods) lines.push(desecratedMods.trim());
 	if (mutatedMods) lines.push(mutatedMods.trim());
 	for (var i = 0; i < statusTexts.length; i++) {
 		lines.push("--------");
