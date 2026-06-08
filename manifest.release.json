@@ -1,7 +1,7 @@
   {
   "manifest_version": 3,
   "name": "PoE2 Trade Copy Button",
-  "version": "2.2",
+  "version": "2.3",
   "description": "Adds a copy button next to PoE2 trade items. Similar in style to the PoE1 GGG button.",
   "content_scripts": [
     {
