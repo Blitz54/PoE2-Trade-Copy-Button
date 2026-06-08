@@ -125,6 +125,7 @@ function parseItemDataSimple(itemElement) {
 		"item-popup--magic": "Magic",
 		"item-popup--normal": "Normal",
 		"item-popup--unique": "Unique",
+		"item-popup--runic-unique": "Unique",
 		"item-popup--relic": "Relic",
 	};
 	var rarity = "Unknown";
