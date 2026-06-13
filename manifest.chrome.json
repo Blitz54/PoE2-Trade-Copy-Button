@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "PoE2 Trade Copy Button",
+  "version": "2.3",
+  "description": "Adds a copy button next to PoE2 trade items. Similar in style to the PoE1 GGG button.",
+  "icons": {
+    "128": "PoE2CopyIcon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.pathofexile.com/trade2*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "styles.css"
+      ]
+    }
+  ],
+  "permissions": [
+    "clipboardWrite"
+  ]
+}
