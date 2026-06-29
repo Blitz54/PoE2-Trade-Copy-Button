@@ -253,12 +253,26 @@ function parseItemDataSimple(itemElement) {
 		});
 	}
 
-	function extractModBlocks(selector) {
+	var suffixMap = {
+		"item-mod--fractured":  "fractured",
+		"item-mod--crafted":    "crafted",
+		"item-mod--implicit":   "implicit",
+		"item-mod--desecrated": "desecrated",
+		"item-mod--veiled":     "veiled",
+		"item-mod--mutated":    "mutated",
+	};
+
+	function extractModBlocks(selector, modEls) {
 		var blocks = [];
-		var modEls = itemElement.querySelectorAll(selector);
+		if (!modEls) modEls = Array.from(itemElement.querySelectorAll(selector));
 
 		for (var i = 0; i < modEls.length; i++) {
 			var mod = modEls[i];
+
+			var modSuffixes = [];
+			for (var cls in suffixMap) {
+				if (mod.classList.contains(cls)) modSuffixes.push(suffixMap[cls]);
+			}
 
 			var leftEl = mod.querySelector(".lc.l.pr, .lc.l.su");
 			if (!leftEl) {
@@ -276,7 +290,7 @@ function parseItemDataSimple(itemElement) {
 					var last = statLines.length - 1;
 					statLines[last] = injectRanges(statLines[last], ranges);
 				}
-				if (statLines.length > 0) blocks.push({ header: null, lines: statLines });
+				if (statLines.length > 0) blocks.push({ header: null, lines: statLines, suffixes: modSuffixes });
 				continue;
 			}
 
@@ -369,7 +383,7 @@ function parseItemDataSimple(itemElement) {
 					if (existing) {
 						for (var li = 0; li < segLines[s].length; li++) existing.lines.push(segLines[s][li]);
 					} else {
-						blocks.push({ header: h, lines: segLines[s] });
+						blocks.push({ header: h, lines: segLines[s], suffixes: modSuffixes });
 					}
 				}
 
@@ -405,38 +419,50 @@ function parseItemDataSimple(itemElement) {
 				if (existing) {
 					for (var li = 0; li < statLines.length; li++) existing.lines.push(statLines[li]);
 				} else {
-					blocks.push({ header: header, lines: statLines });
+					blocks.push({ header: header, lines: statLines, suffixes: modSuffixes });
 				}
 			}
 		}
 		return blocks;
 	}
 
-	var enchantBlocks    = extractModBlocks(".item-mod--enchant");
-	var runeBlocks       = extractModBlocks(".item-mod--rune");
-	var implicitBlocks   = extractModBlocks(".item-mod--implicit");
-	var fracturedBlocks  = extractModBlocks(".item-mod--fractured");
-	var explicitBlocks   = extractModBlocks(".item-mod--explicit");
-	var desecratedBlocks = extractModBlocks(".item-mod--desecrated");
-	var veiledBlocks     = extractModBlocks(".item-mod--veiled");
-	var craftedBlocks    = extractModBlocks(".item-mod--crafted");
-	var mutatedBlocks    = extractModBlocks(".item-mod--mutated");
+	var claimedMods = new Set();
+	function claimAndExtract(selector) {
+		var els = Array.from(itemElement.querySelectorAll(selector)).filter(function(el) {
+			return !claimedMods.has(el);
+		});
+		els.forEach(function(el) { claimedMods.add(el); });
+		return extractModBlocks(null, els);
+	}
 
-    function renderBlocks(blocks, labelSuffix, uniqueFallback) {
-        var out = "";
-        for (var i = 0; i < blocks.length; i++) {
-            var b = blocks[i];
-            var header = b.header;
-            if (!header && uniqueFallback) header = "{ Unique Modifier }";
-            if (header) out += header + "\n";
-            for (var j = 0; j < b.lines.length; j++) {
-                out += b.lines[j];
-                if (labelSuffix) out += " (" + labelSuffix + ")";
-                out += "\n";
-            }
-        }
-        return out;
-    }
+	var enchantBlocks    = claimAndExtract(".item-mod--enchant");
+	var runeBlocks       = claimAndExtract(".item-mod--rune");
+	var implicitBlocks   = claimAndExtract(".item-mod--implicit");
+	var fracturedBlocks  = claimAndExtract(".item-mod--fractured");
+	var explicitBlocks   = claimAndExtract(".item-mod--explicit");
+	var desecratedBlocks = claimAndExtract(".item-mod--desecrated");
+	var veiledBlocks     = claimAndExtract(".item-mod--veiled");
+	var craftedBlocks    = claimAndExtract(".item-mod--crafted");
+	var mutatedBlocks    = claimAndExtract(".item-mod--mutated");
+
+	function renderBlocks(blocks, labelSuffix, uniqueFallback) {
+		var out = "";
+		for (var i = 0; i < blocks.length; i++) {
+			var b = blocks[i];
+			var header = b.header;
+			if (!header && uniqueFallback) header = "{ Unique Modifier }";
+			if (header) out += header + "\n";
+			var suffix = (b.suffixes && b.suffixes.length > 0)
+				? b.suffixes.join(") (")
+				: labelSuffix;
+			for (var j = 0; j < b.lines.length; j++) {
+				out += b.lines[j];
+				if (suffix) out += " (" + suffix + ")";
+				out += "\n";
+			}
+		}
+		return out;
+	}
 
 	// Enchant blocks always get { Corruption Enhancement } header — no tier info in DOM
 	function renderEnchantBlocks(blocks) {
@@ -454,12 +480,12 @@ function parseItemDataSimple(itemElement) {
 	var enchantMods    = renderEnchantBlocks(enchantBlocks);
 	var runeMods       = renderBlocks(runeBlocks, "rune");
 	var implicitMods   = renderBlocks(implicitBlocks, "implicit");
-	var fracturedMods  = renderBlocks(fracturedBlocks, "fractured");
+	var fracturedMods  = renderBlocks(fracturedBlocks, null);
 	var explicitMods   = renderBlocks(explicitBlocks, null, rarity === "Unique" || rarity === "Relic");
-	var craftedMods    = renderBlocks(craftedBlocks, "crafted");
-	var veiledMods     = renderBlocks(veiledBlocks, "veiled");
-	var desecratedMods = renderBlocks(desecratedBlocks, "desecrated");
-	var mutatedMods    = renderBlocks(mutatedBlocks, "mutated");
+	var craftedMods    = renderBlocks(craftedBlocks, null);
+	var veiledMods     = renderBlocks(veiledBlocks, null);
+	var desecratedMods = renderBlocks(desecratedBlocks, null);
+	var mutatedMods    = renderBlocks(mutatedBlocks, null);
 
 	var statusTexts = [];
 	var statusDivs = itemElement.querySelectorAll('.item-popup__content > div:not([class])');
